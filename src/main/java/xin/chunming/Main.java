@@ -1,0 +1,186 @@
+package xin.chunming;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import xin.chunming.bean.PortalUser;
+import xin.chunming.bean.Router;
+import xin.chunming.ddns.AliyunBean;
+import xin.chunming.ddns.Domain;
+import xin.chunming.ddns.Sample;
+
+import java.io.*;
+import java.net.SocketTimeoutException;
+import java.util.Date;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
+import static xin.chunming.Login.login_lnuni;
+
+@Slf4j
+public class Main {
+    public static void main(String[] args) throws Exception {
+        String path = Main.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
+
+        // 2. 处理路径（如果是 JAR 运行，获取其父目录）
+        File jarFile = new File(path);
+        String jarDir = jarFile.getParentFile().getAbsolutePath();
+
+        // 3. 拼接配置文件的完整路径
+        File configFile = new File(jarDir, "synueast_config.json");
+        if (!configFile.exists()) {
+            String s = "{\n" +
+                    "  \"portal\": {\n" +
+                    "    \"PortalAddr\": \"\",\n" +
+                    "    \"brasIp\": \"\",\n" +
+                    "    \"username\": \"\",\n" +
+                    "    \"password_secrete\": \"\",\n" +
+                    "    \"router\": {\n" +
+                    "      \"addr\": \"\",\n" +
+                    "      \"username\": \"\",\n" +
+                    "      \"password\": \"\",\n" +
+                    "      \"pass\": \"\"\n" +
+                    "    }\n" +
+                    "  },\n" +
+                    "  \"aliyun_ddns\": {\n" +
+                    "    \"AccessKeyId\": \"\",\n" +
+                    "    \"AccessKeySecret\": \"\",\n" +
+                    "    \"domain\": {\n" +
+                    "      \"RecordId\": \"\",\n" +
+                    "      \"RR\": \"\",\n" +
+                    "      \"Type\": \"\"\n" +
+                    "    }\n" +
+                    "  }\n" +
+                    "}";
+            BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(configFile));
+            bufferedWriter.write(s);
+            bufferedWriter.flush();
+            bufferedWriter.close();
+            System.out.println("json配置文件不存在,已生成 请填写后再次运行");
+            log.info("json配置文件不存在,已生成 请填写后再次运行");
+        } else {
+
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            String line;
+            StringBuilder stringBuilder = new StringBuilder();
+            BufferedReader bufferedReader = new BufferedReader(new FileReader(configFile));
+            while ((line = bufferedReader.readLine()) != null) {
+                stringBuilder.append(line);
+            }
+            System.out.println(stringBuilder.toString());
+            JsonNode jsonNode = objectMapper.readTree(stringBuilder.toString());
+            Router r = new Router(null, null,
+                    jsonNode.get("portal").get("router").get("username").asText(),
+                    jsonNode.get("portal").get("router").get("password").asText(),
+                    jsonNode.get("portal").get("router").get("addr").asText(),
+                    jsonNode.get("portal").get("router").get("pass").asText()
+            );
+            PortalUser pu = new PortalUser(
+                    jsonNode.get("portal").get("username").asText(),
+                    jsonNode.get("portal").get("brasIp").asText(),
+                    jsonNode.get("portal").get("password_secrete").asText(),
+                    jsonNode.get("portal").get("PortalAddr").asText()
+            );
+            AliyunBean aliyunBean = new AliyunBean(
+                    jsonNode.get("aliyun_ddns").get("AccessKeyId").asText(),
+                    jsonNode.get("aliyun_ddns").get("AccessKeySecret").asText(),
+                    new Domain(
+                            jsonNode.get("aliyun_ddns").get("domain").get("RecordId").asText(),
+                            jsonNode.get("aliyun_ddns").get("domain").get("RR").asText(),
+                            jsonNode.get("aliyun_ddns").get("domain").get("Type").asText()
+                    ));
+
+            if (args.length > 0) {
+                if (String.valueOf(args[0]).equalsIgnoreCase("login")) {
+                    Authorize(r, pu, aliyunBean);
+                }
+            } else {
+                ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+
+                // scheduleWithFixedDelay: 上次执行完毕后，再等3分钟
+                executor.scheduleWithFixedDelay(
+                        new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    check(r, pu, aliyunBean);
+                                } catch (Exception e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                        },   // 要执行的方法
+                        0,              // 初始延迟（立即开始）
+                        3,              // 间隔
+                        TimeUnit.MINUTES
+                );
+
+                // 阻止主线程退出（daemon线程不需要这行）
+                // 如果是独立进程，main退出后executor线程也会结束，需要保活
+                Thread.currentThread().join();
+            }
+        }
+    }
+
+    private static void Authorize(Router r, PortalUser pu, AliyunBean aliyunBean) throws Exception {
+        Date date = new Date();
+        System.out.println(date);
+        log.info(String.valueOf(date));
+
+
+        System.out.println("获取token...");
+        log.info("获取token...");
+        r.setToken(GetToken.getToken(r));
+        System.out.println(r.getToken());
+        log.info(r.getToken());
+        log.info("重置wanip");
+        System.out.println("重置wanip");
+        ResetWanip.reConn(r, ResetWanip.DOWN);
+        Thread.sleep(2000);
+        ResetWanip.reConn(r, ResetWanip.UP);
+        Thread.sleep(2000);
+        ResetWanip.reConn(r, ResetWanip.RECONNECT);
+        Thread.sleep(3500);
+        System.out.println("获取wanip...");
+        log.info("获取wanip...");
+        GetWanip getWanip = new GetWanip(r);
+
+        getWanip.get();
+        if (r.getWanip() != null ) {
+            System.out.println(r.getWanip());
+            log.info(r.getWanip());
+            log.info("请求portal认证...");
+            System.out.println("请求portal认证...");
+
+            login_lnuni(r.getWanip(), pu);
+
+            Sample.wanip = r.getWanip();
+            Sample.ab = aliyunBean;
+            Sample.reg();
+        } else {
+            System.out.println("发生问题!");
+            log.info("发生问题!");
+        }
+    }
+
+    private static void check(Router r, PortalUser pu, AliyunBean aliyunBean) throws Exception {
+        OkHttpClient client = new OkHttpClient();
+        Request request = new Request.Builder()
+                .url("http://223.5.5.5")  //
+                .build();
+        Response execute = null;
+        try {
+            execute = client.newCall(request).execute();
+        } catch (SocketTimeoutException e) {
+            e.printStackTrace();
+        }
+        if (execute.body().string().contains("统一接入认证")) {
+            Authorize(r, pu, aliyunBean);
+        } else System.out.println("正常");
+    }
+
+}
