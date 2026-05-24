@@ -1,10 +1,11 @@
 package xin.chunming;
 
+import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import xin.chunming.bean.Router;
 
 import java.io.IOException;
-
+@Slf4j
 public class ResetWanip {
 
     public static final String DOWN = "link_dhcp_down";

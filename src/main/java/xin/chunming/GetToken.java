@@ -1,5 +1,6 @@
 package xin.chunming;
 
+import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import xin.chunming.*;
 import xin.chunming.bean.Router;
@@ -8,7 +9,7 @@ import xin.chunming.bean.Router;
 import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
+@Slf4j
 public class GetToken {
 
     private static final OkHttpClient CLIENT = new OkHttpClient();

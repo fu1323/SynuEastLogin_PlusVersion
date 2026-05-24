@@ -2,11 +2,13 @@ package xin.chunming;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import xin.chunming.bean.Router;
 
 import java.io.IOException;
 
+@Slf4j
 public class GetWanip {
 
     private static final OkHttpClient CLIENT = new OkHttpClient();

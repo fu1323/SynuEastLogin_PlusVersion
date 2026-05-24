@@ -48,6 +48,7 @@ public class Main {
                     "    }\n" +
                     "  },\n" +
                     "  \"aliyun_ddns\": {\n" +
+                    "\"enable\":\"true\"," +
                     "    \"AccessKeyId\": \"\",\n" +
                     "    \"AccessKeySecret\": \"\",\n" +
                     "    \"domain\": {\n" +
@@ -95,7 +96,9 @@ public class Main {
                             jsonNode.get("aliyun_ddns").get("domain").get("RecordId").asText(),
                             jsonNode.get("aliyun_ddns").get("domain").get("RR").asText(),
                             jsonNode.get("aliyun_ddns").get("domain").get("Type").asText()
-                    ));
+                    ),
+                    Boolean.parseBoolean(jsonNode.get("aliyun_ddns").get("enable").asText())
+            );
 
             if (args.length > 0) {
                 if (String.valueOf(args[0]).equalsIgnoreCase("login")) {
