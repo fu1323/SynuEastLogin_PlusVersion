@@ -10,6 +10,7 @@ public class PortalUser {
     private String brasIp;
     private String pwdSecrete;
     private String portaladdr;
+    private String auto_check_minutes;
 
 
 }

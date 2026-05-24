@@ -39,6 +39,7 @@ public class Main {
                     "    \"brasIp\": \"\",\n" +
                     "    \"username\": \"\",\n" +
                     "    \"password_secrete\": \"\",\n" +
+                    " \"auto_check_minutes\": \"3\"," +
                     "    \"router\": {\n" +
                     "      \"addr\": \"\",\n" +
                     "      \"username\": \"\",\n" +
@@ -84,7 +85,8 @@ public class Main {
                     jsonNode.get("portal").get("username").asText(),
                     jsonNode.get("portal").get("brasIp").asText(),
                     jsonNode.get("portal").get("password_secrete").asText(),
-                    jsonNode.get("portal").get("PortalAddr").asText()
+                    jsonNode.get("portal").get("PortalAddr").asText(),
+                    jsonNode.get("portal").get("auto_check_minutes").asText()
             );
             AliyunBean aliyunBean = new AliyunBean(
                     jsonNode.get("aliyun_ddns").get("AccessKeyId").asText(),
@@ -115,7 +117,7 @@ public class Main {
                             }
                         },   // 要执行的方法
                         0,              // 初始延迟（立即开始）
-                        3,              // 间隔
+                        Integer.parseInt(pu.getAuto_check_minutes()),              // 间隔
                         TimeUnit.MINUTES
                 );
 
@@ -150,7 +152,7 @@ public class Main {
         GetWanip getWanip = new GetWanip(r);
 
         getWanip.get();
-        if (r.getWanip() != null ) {
+        if (r.getWanip() != null) {
             System.out.println(r.getWanip());
             log.info(r.getWanip());
             log.info("请求portal认证...");
