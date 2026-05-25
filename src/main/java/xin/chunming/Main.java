@@ -11,6 +11,8 @@ import xin.chunming.bean.Router;
 import xin.chunming.ddns.AliyunBean;
 import xin.chunming.ddns.Domain;
 import xin.chunming.ddns.Sample;
+import xin.chunming.tasmota.bean.ip;
+import xin.chunming.tasmota.tasmotacheck;
 
 import java.io.*;
 import java.net.SocketTimeoutException;
@@ -23,6 +25,7 @@ import static xin.chunming.Login.login_lnuni;
 
 @Slf4j
 public class Main {
+    static String tasmotanow= null;
     public static void main(String[] args) throws Exception {
         String path = Main.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
 
@@ -35,20 +38,20 @@ public class Main {
         if (!configFile.exists()) {
             String s = "{\n" +
                     "  \"portal\": {\n" +
-                    "    \"PortalAddr\": \"\",\n" +
-                    "    \"brasIp\": \"\",\n" +
+                    "    \"PortalAddr\": \"42.177.95.156:9919\",\n" +
+                    "    \"brasIp\": \"218.25.0.169\",\n" +
                     "    \"username\": \"\",\n" +
                     "    \"password_secrete\": \"\",\n" +
-                    " \"auto_check_minutes\": \"3\"," +
+                    "    \"auto_check_minutes\": \"3\",\n" +
                     "    \"router\": {\n" +
-                    "      \"addr\": \"\",\n" +
+                    "      \"addr\": \"192.168.9.1\",\n" +
                     "      \"username\": \"\",\n" +
                     "      \"password\": \"\",\n" +
                     "      \"pass\": \"\"\n" +
                     "    }\n" +
                     "  },\n" +
                     "  \"aliyun_ddns\": {\n" +
-                    "\"enable\":\"true\"," +
+                    "    \"enable\": \"false\",\n" +
                     "    \"AccessKeyId\": \"\",\n" +
                     "    \"AccessKeySecret\": \"\",\n" +
                     "    \"domain\": {\n" +
@@ -56,6 +59,12 @@ public class Main {
                     "      \"RR\": \"\",\n" +
                     "      \"Type\": \"\"\n" +
                     "    }\n" +
+                    "  },\n" +
+                    "  \"tasmota\": {\n" +
+                    "    \"enable\": \"false\",\n" +
+                    "    \"pcip\": \"\",\n" +
+                    "    \"pcipbak\": \"\",\n" +
+                    "    \"tasmotaip\": \"\"\n" +
                     "  }\n" +
                     "}";
             BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(configFile));
@@ -99,10 +108,20 @@ public class Main {
                     ),
                     Boolean.parseBoolean(jsonNode.get("aliyun_ddns").get("enable").asText())
             );
+            ip ip = new ip(
+                    Boolean.parseBoolean(jsonNode.get("tasmota").get("enable").asText()),
+                    jsonNode.get("tasmota").get("pcipbak").asText(),
+                    jsonNode.get("tasmota").get("pcip").asText(),
+                    jsonNode.get("tasmota").get("tasmotaip").asText()
+
+
+            );
 
             if (args.length > 0) {
                 if (String.valueOf(args[0]).equalsIgnoreCase("login")) {
                     Authorize(r, pu, aliyunBean);
+                } else if (String.valueOf(args[0]).equalsIgnoreCase("tasmota")) {
+                    tasmotacheck.checktasmota(ip,null);
                 }
             } else {
                 ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
@@ -114,6 +133,13 @@ public class Main {
                             public void run() {
                                 try {
                                     check(r, pu, aliyunBean);
+                                    if (ip.isEnadle()) {
+                                        System.out.println("tasmotabefore:"+tasmotanow);
+                                        log.info("tasmotabefore:"+tasmotanow);
+                                     tasmotanow= tasmotacheck.checktasmota(ip,tasmotanow);
+                                        System.out.println("tasmotanow:" + tasmotanow);
+                                       log.info("tasmotanow:" + tasmotanow);
+                                    }
                                 } catch (Exception e) {
                                     throw new RuntimeException(e);
                                 }
@@ -162,10 +188,11 @@ public class Main {
             System.out.println("请求portal认证...");
 
             login_lnuni(r.getWanip(), pu);
-
-            Sample.wanip = r.getWanip();
-            Sample.ab = aliyunBean;
-            Sample.reg();
+            if (aliyunBean.isEnable()) {
+                Sample.wanip = r.getWanip();
+                Sample.ab = aliyunBean;
+                Sample.reg();
+            }
         } else {
             System.out.println("发生问题!");
             log.info("发生问题!");
