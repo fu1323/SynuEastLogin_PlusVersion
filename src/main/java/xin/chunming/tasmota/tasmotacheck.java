@@ -1,6 +1,7 @@
 package xin.chunming.tasmota;
 
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.OkHttpClient;
 import xin.chunming.tasmota.bean.*;
 
 
@@ -9,7 +10,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 public class tasmotacheck {
-    public static String checktasmota(ip ip, String now) throws Exception {
+    public static String checktasmota(ip ip, String now, OkHttpClient client) throws Exception {
 
         AtomicInteger court = new AtomicInteger(0);
         int temp = 0;
@@ -26,11 +27,11 @@ public class tasmotacheck {
             try {
                 if (now != null) {
                     if (!now.equalsIgnoreCase(close.CLOSE)) {
-                        close.operate(ip, close.CLOSE);
+                        close.operate(ip, close.CLOSE,client);
                         return close.CLOSE;
                     }
                 } else {
-                    close.operate(ip, close.CLOSE);
+                    close.operate(ip, close.CLOSE,client);
                     return close.CLOSE;
                 }
             } catch (IOException e) {
@@ -40,11 +41,11 @@ public class tasmotacheck {
             try {
                 if (now != null) {
                     if (!now.equalsIgnoreCase(close.OPEN)) {
-                        close.operate(ip, close.OPEN);
+                        close.operate(ip, close.OPEN,client);
                         return close.OPEN;
                     }
-                }else {
-                    close.operate(ip, close.OPEN);
+                } else {
+                    close.operate(ip, close.OPEN,client);
                     return close.OPEN;
                 }
             } catch (IOException e) {

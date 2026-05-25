@@ -13,6 +13,7 @@ import xin.chunming.ddns.Domain;
 import xin.chunming.ddns.Sample;
 import xin.chunming.tasmota.bean.ip;
 import xin.chunming.tasmota.tasmotacheck;
+import xin.chunming.tasmota.bean.tasmotastatus;
 
 import java.io.*;
 import java.net.SocketTimeoutException;
@@ -25,8 +26,11 @@ import static xin.chunming.Login.login_lnuni;
 
 @Slf4j
 public class Main {
-    static String tasmotanow = null;
-
+    static tasmotastatus status = new tasmotastatus();
+    public static OkHttpClient client = new OkHttpClient.Builder()
+            .connectTimeout(5, java.util.concurrent.TimeUnit.SECONDS)
+            .readTimeout(5, java.util.concurrent.TimeUnit.SECONDS)
+            .build();
     public static void main(String[] args) throws Exception {
         String path = Main.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
 
@@ -122,7 +126,7 @@ public class Main {
                 if (String.valueOf(args[0]).equalsIgnoreCase("login")) {
                     Authorize(r, pu, aliyunBean);
                 } else if (String.valueOf(args[0]).equalsIgnoreCase("tasmota")) {
-                    tasmotacheck.checktasmota(ip, null);
+                    tasmotacheck.checktasmota(ip, null,client);
                 }
             } else {
                 ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
@@ -135,11 +139,11 @@ public class Main {
                                 try {
                                     check(r, pu, aliyunBean);
                                     if (ip.isEnadle()) {
-                                        System.out.println("tasmotabefore:" + tasmotanow);
-                                        log.info("tasmotabefore:" + tasmotanow);
-                                        tasmotanow = tasmotacheck.checktasmota(ip, tasmotanow);
-                                        System.out.println("tasmotanow:" + tasmotanow);
-                                        log.info("tasmotanow:" + tasmotanow);
+                                        System.out.println("tasmotabefore:" + status.getStatus());
+                                        log.info("tasmotabefore:" + status.getStatus());
+                                        status.setStatus(tasmotacheck.checktasmota(ip, status.getStatus(),client));
+                                        System.out.println("tasmotanow:" + status.getStatus());
+                                        log.info("tasmotanow:" + status.getStatus());
                                     }
                                 } catch (Exception e) {
                                     log.error(e.getMessage());
@@ -152,13 +156,13 @@ public class Main {
                             }
                         },   // 要执行的方法
                         0,              // 初始延迟（立即开始）
-                         Integer.parseInt(pu.getAuto_check_minutes()),              // 间隔
-                       TimeUnit.MINUTES
+                        Integer.parseInt(pu.getAuto_check_minutes()),              // 间隔
+                        TimeUnit.MINUTES
                 );
 
                 // 阻止主线程退出（daemon线程不需要这行）
                 // 如果是独立进程，main退出后executor线程也会结束，需要保活
-                Thread.currentThread().join();
+                //Thread.currentThread().join();
             }
         }
     }
@@ -171,29 +175,29 @@ public class Main {
 
         System.out.println("获取token...");
         log.info("获取token...");
-        r.setToken(GetToken.getToken(r));
+        r.setToken(GetToken.getToken(r,client));
         System.out.println(r.getToken());
         log.info(r.getToken());
         log.info("重置wanip");
         System.out.println("重置wanip");
-        ResetWanip.reConn(r, ResetWanip.DOWN);
+        ResetWanip.reConn(r, ResetWanip.DOWN,client);
         Thread.sleep(2000);
-        ResetWanip.reConn(r, ResetWanip.UP);
+        ResetWanip.reConn(r, ResetWanip.UP,client);
         Thread.sleep(2000);
-        ResetWanip.reConn(r, ResetWanip.RECONNECT);
+        ResetWanip.reConn(r, ResetWanip.RECONNECT,client);
         Thread.sleep(3500);
         System.out.println("获取wanip...");
         log.info("获取wanip...");
         GetWanip getWanip = new GetWanip(r);
 
-        getWanip.get();
+        getWanip.get(client);
         if (r.getWanip() != null) {
             System.out.println(r.getWanip());
             log.info(r.getWanip());
             log.info("请求portal认证...");
             System.out.println("请求portal认证...");
 
-            login_lnuni(r.getWanip(), pu);
+            login_lnuni(r.getWanip(), pu,client);
             if (aliyunBean.isEnable()) {
                 Sample.wanip = r.getWanip();
                 Sample.ab = aliyunBean;
@@ -206,7 +210,7 @@ public class Main {
     }
 
     private static void check(Router r, PortalUser pu, AliyunBean aliyunBean) throws Exception {
-        OkHttpClient client = new OkHttpClient();
+
         Request request = new Request.Builder()
                 .url("http://223.5.5.5")  //
                 .build();
@@ -218,6 +222,8 @@ public class Main {
         }
         if (execute.body().string().contains("统一接入认证")) {
             Authorize(r, pu, aliyunBean);
+            execute.body().close();
+            execute.close();
         } else System.out.println("正常");
     }
 

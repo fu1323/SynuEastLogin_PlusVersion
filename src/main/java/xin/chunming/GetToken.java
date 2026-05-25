@@ -9,12 +9,13 @@ import xin.chunming.bean.Router;
 import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 @Slf4j
 public class GetToken {
 
-    private static final OkHttpClient CLIENT = new OkHttpClient();
+    //private static final OkHttpClient CLIENT = new OkHttpClient();
 
-    public static String getToken(Router r) throws IOException {
+    public static String getToken(Router r, OkHttpClient client) throws IOException {
 
         MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
@@ -36,7 +37,7 @@ public class GetToken {
                         "username=" + r.getUsername() + "; sess_key=")
                 .build();
 
-        try (Response response = CLIENT.newCall(request).execute()) {
+        try (Response response = client.newCall(request).execute()) {
 
             String cookie = response.header("Set-Cookie");
 
@@ -51,6 +52,7 @@ public class GetToken {
                 return matcher.group(1);
             }
 
+            response.close();
             return null;
         }
     }

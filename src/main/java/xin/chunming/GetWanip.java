@@ -11,7 +11,7 @@ import java.io.IOException;
 @Slf4j
 public class GetWanip {
 
-    private static final OkHttpClient CLIENT = new OkHttpClient();
+    //  private static final OkHttpClient CLIENT = new OkHttpClient();
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
@@ -24,7 +24,7 @@ public class GetWanip {
         this.router = router;
     }
 
-    public String get() throws IOException {
+    public String get(OkHttpClient client) throws IOException {
 
         String json = "{"
                 + "\"func_name\":\"wan\","
@@ -55,7 +55,7 @@ public class GetWanip {
                 )
                 .build();
 
-        try (Response response = CLIENT.newCall(request).execute()) {
+        try (Response response = client.newCall(request).execute()) {
 
             if (!response.isSuccessful()) {
                 throw new IOException(
@@ -86,7 +86,8 @@ public class GetWanip {
             String wanIp = ipNode.asText();
 
             router.setWanip(wanIp);
-
+            responseBody.close();
+            response.close();
             return wanIp;
         }
     }

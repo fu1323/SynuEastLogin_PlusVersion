@@ -12,12 +12,12 @@ public class ResetWanip {
     public static final String UP = "link_dhcp_up";
     public static final String RECONNECT = "link_dhcp_reconnect";
 
-    private static final OkHttpClient CLIENT = new OkHttpClient();
+    //private static final OkHttpClient CLIENT = new OkHttpClient();
 
     private static final MediaType JSON
             = MediaType.parse("application/json; charset=utf-8");
 
-    public static void reConn(Router r, String action) throws IOException {
+    public static void reConn(Router r, String action,OkHttpClient client) throws IOException {
 
         String json = "{"
                 + "\"func_name\":\"wan\","
@@ -39,7 +39,7 @@ public class ResetWanip {
                 .addHeader("User-Agent", "Mozilla/5.0")
                 .build();
 
-        try (Response response = CLIENT.newCall(request).execute()) {
+        try (Response response = client.newCall(request).execute()) {
 
             if (!response.isSuccessful()) {
                 throw new IOException(

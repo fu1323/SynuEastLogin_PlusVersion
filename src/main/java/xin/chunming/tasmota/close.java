@@ -12,11 +12,11 @@ import java.io.Reader;
 
 @Slf4j
 public class close {
-    static OkHttpClient client = new OkHttpClient();
+    //static OkHttpClient client = new OkHttpClient();
     static String CLOSE = "ON";
     static String OPEN = "OFF";
 
-    public static void operate(ip addr, String operater) throws IOException {
+    public static void operate(ip addr, String operater,OkHttpClient client) throws IOException {
 
         Request.Builder requestBuilder2 = new Request.Builder()
                 .url("http://" + addr.getTasmotaip() + "/?m=1");
@@ -26,7 +26,7 @@ public class close {
 //        StringBuilder stringBuilder = new StringBuilder();
         while (bufferedReader.read() != -1) {
             if (bufferedReader.readLine().contains(operater)) {
-                toggle(addr.getTasmotaip());
+                toggle(addr.getTasmotaip(),client);
                 log.info("tasmota:toggle ok");
                 System.out.println("OK");
             } else {
@@ -35,12 +35,15 @@ public class close {
             }
             break;
         }
+        response2.body().close();
+        response2.close();
     }
 
-    public static void toggle(String ip) throws IOException {
+    public static void toggle(String ip,OkHttpClient client) throws IOException {
         Request.Builder requestBuilder = new Request.Builder()
                 .url("http://" + ip + "/?m=1&o=1");
         Response response = client.newCall(requestBuilder.build()).execute();
+        response.close();
 
     }
 }
