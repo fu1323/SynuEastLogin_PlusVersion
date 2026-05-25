@@ -24,7 +24,12 @@ public class tasmotacheck {
         }
         if (temp > 0 && court.get() - temp != 0) {
             try {
-                if (!now.equalsIgnoreCase(close.CLOSE)) {
+                if (now != null) {
+                    if (!now.equalsIgnoreCase(close.CLOSE)) {
+                        close.operate(ip, close.CLOSE);
+                        return close.CLOSE;
+                    }
+                } else {
                     close.operate(ip, close.CLOSE);
                     return close.CLOSE;
                 }
@@ -33,7 +38,12 @@ public class tasmotacheck {
             }
         } else {
             try {
-                if (!now.equalsIgnoreCase(close.OPEN)) {
+                if (now != null) {
+                    if (!now.equalsIgnoreCase(close.OPEN)) {
+                        close.operate(ip, close.OPEN);
+                        return close.OPEN;
+                    }
+                }else {
                     close.operate(ip, close.OPEN);
                     return close.OPEN;
                 }

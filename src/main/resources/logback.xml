@@ -45,8 +45,8 @@
 
     <!-- 4. 特定包的日志级别控制 (可选) -->
     <!-- 比如：把 com.example.dao 包下的日志级别设为 DEBUG，方便看 SQL -->
-    <logger name="com.example.dao" level="DEBUG" additivity="false">
-        <appender-ref ref="CONSOLE" />
-    </logger>
+<!--    <logger name="com.example.dao" level="DEBUG" additivity="false">-->
+<!--        <appender-ref ref="CONSOLE" />-->
+<!--    </logger>-->
 
 </configuration>

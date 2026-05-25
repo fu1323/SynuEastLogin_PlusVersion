@@ -25,7 +25,8 @@ import static xin.chunming.Login.login_lnuni;
 
 @Slf4j
 public class Main {
-    static String tasmotanow= null;
+    static String tasmotanow = null;
+
     public static void main(String[] args) throws Exception {
         String path = Main.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
 
@@ -121,7 +122,7 @@ public class Main {
                 if (String.valueOf(args[0]).equalsIgnoreCase("login")) {
                     Authorize(r, pu, aliyunBean);
                 } else if (String.valueOf(args[0]).equalsIgnoreCase("tasmota")) {
-                    tasmotacheck.checktasmota(ip,null);
+                    tasmotacheck.checktasmota(ip, null);
                 }
             } else {
                 ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
@@ -134,25 +135,30 @@ public class Main {
                                 try {
                                     check(r, pu, aliyunBean);
                                     if (ip.isEnadle()) {
-                                        System.out.println("tasmotabefore:"+tasmotanow);
-                                        log.info("tasmotabefore:"+tasmotanow);
-                                     tasmotanow= tasmotacheck.checktasmota(ip,tasmotanow);
+                                        System.out.println("tasmotabefore:" + tasmotanow);
+                                        log.info("tasmotabefore:" + tasmotanow);
+                                        tasmotanow = tasmotacheck.checktasmota(ip, tasmotanow);
                                         System.out.println("tasmotanow:" + tasmotanow);
-                                       log.info("tasmotanow:" + tasmotanow);
+                                        log.info("tasmotanow:" + tasmotanow);
                                     }
                                 } catch (Exception e) {
-                                    throw new RuntimeException(e);
+                                    log.error(e.getMessage());
+                                    StackTraceElement[] stackTrace = e.getStackTrace();
+                                    for (StackTraceElement stackTraceElement : stackTrace) {
+                                        log.error(stackTraceElement.toString());
+                                    }
+
                                 }
                             }
                         },   // 要执行的方法
                         0,              // 初始延迟（立即开始）
-                        Integer.parseInt(pu.getAuto_check_minutes()),              // 间隔
+                        Integer.parseInt("1"),              // 间隔
                         TimeUnit.MINUTES
                 );
 
                 // 阻止主线程退出（daemon线程不需要这行）
                 // 如果是独立进程，main退出后executor线程也会结束，需要保活
-                Thread.currentThread().join();
+                //Thread.currentThread().join();
             }
         }
     }
