@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 public class tasmotacheck {
-    public static String checktasmota(ip ip, String now, OkHttpClient client) throws Exception {
+    public static void checktasmota(ip ip, tasmotastatus now, OkHttpClient client) throws Exception {
 
         AtomicInteger court = new AtomicInteger(0);
         int temp = 0;
@@ -26,13 +26,14 @@ public class tasmotacheck {
         if (temp > 0 && court.get() - temp != 0) {
             try {
                 if (now != null) {
-                    if (!now.equalsIgnoreCase(close.CLOSE)) {
+                    if (!now.getStatus().equalsIgnoreCase(close.CLOSE)) {
                         close.operate(ip, close.CLOSE,client);
-                        return close.CLOSE;
+                        now.setStatus(close.CLOSE);
                     }
                 } else {
                     close.operate(ip, close.CLOSE,client);
-                    return close.CLOSE;
+                    now.setStatus(close.CLOSE);
+
                 }
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -40,19 +41,21 @@ public class tasmotacheck {
         } else {
             try {
                 if (now != null) {
-                    if (!now.equalsIgnoreCase(close.OPEN)) {
+                    if (!now.getStatus().equalsIgnoreCase(close.OPEN)) {
                         close.operate(ip, close.OPEN,client);
-                        return close.OPEN;
+                        now.setStatus(close.OPEN);
+
                     }
                 } else {
                     close.operate(ip, close.OPEN,client);
-                    return close.OPEN;
+                    now.setStatus(close.OPEN);
+
                 }
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         }
-        return null;
+
     }
 
 }

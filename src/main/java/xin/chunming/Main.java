@@ -12,6 +12,7 @@ import xin.chunming.ddns.AliyunBean;
 import xin.chunming.ddns.Domain;
 import xin.chunming.ddns.Sample;
 import xin.chunming.tasmota.bean.ip;
+import xin.chunming.tasmota.close;
 import xin.chunming.tasmota.tasmotacheck;
 import xin.chunming.tasmota.bean.tasmotastatus;
 
@@ -31,6 +32,7 @@ public class Main {
             .connectTimeout(5, java.util.concurrent.TimeUnit.SECONDS)
             .readTimeout(5, java.util.concurrent.TimeUnit.SECONDS)
             .build();
+
     public static void main(String[] args) throws Exception {
         String path = Main.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
 
@@ -126,7 +128,7 @@ public class Main {
                 if (String.valueOf(args[0]).equalsIgnoreCase("login")) {
                     Authorize(r, pu, aliyunBean);
                 } else if (String.valueOf(args[0]).equalsIgnoreCase("tasmota")) {
-                    tasmotacheck.checktasmota(ip, null,client);
+                    tasmotacheck.checktasmota(ip, null, client);
                 }
             } else {
                 ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
@@ -139,11 +141,14 @@ public class Main {
                                 try {
                                     check(r, pu, aliyunBean);
                                     if (ip.isEnadle()) {
-                                        System.out.println("tasmotabefore:" + status.getStatus());
-                                        log.info("tasmotabefore:" + status.getStatus());
-                                        status.setStatus(tasmotacheck.checktasmota(ip, status.getStatus(),client));
-                                        System.out.println("tasmotanow:" + status.getStatus());
-                                        log.info("tasmotanow:" + status.getStatus());
+                                        if (status.getStatus() != null) {
+                                            System.out.println("tasmotabefore:" + (status.getStatus().equalsIgnoreCase(close.CLOSE) ? "开" : "关"));
+                                            log.info("tasmotabefore:" + (status.getStatus().equalsIgnoreCase(close.CLOSE) ? "开" : "关"));
+                                        }
+                                        status.setStatus(close.CLOSE);
+                                        tasmotacheck.checktasmota(ip, status, client);
+                                        System.out.println("tasmotanow:" + (status.getStatus().equalsIgnoreCase(close.CLOSE) ? "开" : "关"));
+                                        log.info("tasmotanow:" + (status.getStatus().equalsIgnoreCase(close.CLOSE) ? "开" : "关"));
                                     }
                                 } catch (Exception e) {
                                     log.error(e.getMessage());
@@ -175,16 +180,16 @@ public class Main {
 
         System.out.println("获取token...");
         log.info("获取token...");
-        r.setToken(GetToken.getToken(r,client));
+        r.setToken(GetToken.getToken(r, client));
         System.out.println(r.getToken());
         log.info(r.getToken());
         log.info("重置wanip");
         System.out.println("重置wanip");
-        ResetWanip.reConn(r, ResetWanip.DOWN,client);
+        ResetWanip.reConn(r, ResetWanip.DOWN, client);
         Thread.sleep(2000);
-        ResetWanip.reConn(r, ResetWanip.UP,client);
+        ResetWanip.reConn(r, ResetWanip.UP, client);
         Thread.sleep(2000);
-        ResetWanip.reConn(r, ResetWanip.RECONNECT,client);
+        ResetWanip.reConn(r, ResetWanip.RECONNECT, client);
         Thread.sleep(3500);
         System.out.println("获取wanip...");
         log.info("获取wanip...");
@@ -197,7 +202,7 @@ public class Main {
             log.info("请求portal认证...");
             System.out.println("请求portal认证...");
 
-            login_lnuni(r.getWanip(), pu,client);
+            login_lnuni(r.getWanip(), pu, client);
             if (aliyunBean.isEnable()) {
                 Sample.wanip = r.getWanip();
                 Sample.ab = aliyunBean;

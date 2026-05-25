@@ -13,7 +13,7 @@ import java.io.Reader;
 @Slf4j
 public class close {
     //static OkHttpClient client = new OkHttpClient();
-    static String CLOSE = "ON";
+    public static String CLOSE = "ON";
     static String OPEN = "OFF";
 
     public static void operate(ip addr, String operater,OkHttpClient client) throws IOException {
@@ -30,8 +30,8 @@ public class close {
                 log.info("tasmota:toggle ok");
                 System.out.println("OK");
             } else {
-                System.out.println("已经处于状态" + operater);
-                log.info("已经处于状态" + operater);
+                System.out.println("已经处于状态" + (operater.equalsIgnoreCase(close.CLOSE)?"开":"关"));
+                log.info("已经处于状态" + (operater.equalsIgnoreCase(close.CLOSE)?"开":"关"));
             }
             break;
         }
