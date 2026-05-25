@@ -30,6 +30,7 @@ public class Login {
         // 2. 构建 Request
         Request request = new Request.Builder()
                 .url(url)
+                 .post(RequestBody.create(MediaType.parse("application/json"), "{}"))
                 .header("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36")
                 .header("Accept-Encoding", "gzip, deflate")
                 .header("Accept-Language", "zh-CN,zh;q=0.9")
