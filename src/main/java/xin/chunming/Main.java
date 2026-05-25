@@ -152,13 +152,13 @@ public class Main {
                             }
                         },   // 要执行的方法
                         0,              // 初始延迟（立即开始）
-                        Integer.parseInt("1"),              // 间隔
-                        TimeUnit.MINUTES
+                         Integer.parseInt(pu.getAuto_check_minutes()),              // 间隔
+                       TimeUnit.MINUTES
                 );
 
                 // 阻止主线程退出（daemon线程不需要这行）
                 // 如果是独立进程，main退出后executor线程也会结束，需要保活
-                //Thread.currentThread().join();
+                Thread.currentThread().join();
             }
         }
     }
