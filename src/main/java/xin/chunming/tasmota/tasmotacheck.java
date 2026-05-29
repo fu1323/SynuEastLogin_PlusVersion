@@ -16,13 +16,13 @@ public class tasmotacheck {
         int temp = 0;
         ping.main(ip.getEthip(), court);
         System.out.println(court.get());
-        if (court.get() != 0) {
-            temp = court.get();
-
-            if (!ip.getWlanip().isEmpty() || !(ip.getWlanip() == null) || !(ip.getWlanip().equalsIgnoreCase("null")) || !ip.getWlanip().isBlank()) {
-                ping.main(ip.getWlanip(), court);
-            }
-        }
+//        if (court.get() != 0) {
+//            temp = court.get();
+//
+//            if (!ip.getWlanip().isEmpty() || !(ip.getWlanip() == null) || !(ip.getWlanip().equalsIgnoreCase("null")) || !ip.getWlanip().isBlank()) {
+//                ping.main(ip.getWlanip(), court);
+//            }
+//        }
         if (temp > 0 && court.get() - temp != 0) {
             try {
                 if (now != null) {

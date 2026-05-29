@@ -117,7 +117,7 @@ public class Main {
             );
             ip ip = new ip(
                     Boolean.parseBoolean(jsonNode.get("tasmota").get("enable").asText()),
-                    jsonNode.get("tasmota").get("pcipbak").asText(),
+//                    jsonNode.get("tasmota").get("pcipbak").asText(),
                     jsonNode.get("tasmota").get("pcip").asText(),
                     jsonNode.get("tasmota").get("tasmotaip").asText()
 
