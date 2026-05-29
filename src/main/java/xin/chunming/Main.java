@@ -70,7 +70,6 @@ public class Main {
                     "  \"tasmota\": {\n" +
                     "    \"enable\": \"false\",\n" +
                     "    \"pcip\": \"\",\n" +
-                    "    \"pcipbak\": \"\",\n" +
                     "    \"tasmotaip\": \"\"\n" +
                     "  }\n" +
                     "}";
@@ -148,6 +147,8 @@ public class Main {
                                 try {
                                     check(r, pu, aliyunBean);
                                     if (ip.isEnadle()) {
+                                        status.setStatus(close.query(ip, client));
+                                        Thread.sleep(3000);
                                         if (status.getStatus() != null) {
                                             // System.out.println("tasmotabefore:" + (status.getStatus().equalsIgnoreCase("ON") ? "开" : "关"));
                                             log.info("tasmotabefore:" + (status.getStatus().equalsIgnoreCase("ON") ? "开" : "关"));
@@ -155,8 +156,7 @@ public class Main {
                                         tasmotacheck.checktasmota(ip, status, client);
                                         // System.out.println("tasmotanow:" + (status.getStatus().equalsIgnoreCase("ON") ? "开" : "关"));
 
-                                        status.setStatus(close.query(ip, client));
-                                        Thread.sleep(3000);
+
                                         log.info("tasmotanow:" + (status.getStatus().equalsIgnoreCase("ON") ? "开" : "关"));
                                     }
                                 } catch (Exception e) {

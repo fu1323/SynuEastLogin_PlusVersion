@@ -27,7 +27,7 @@ public class ping {
                 System.err.println("Error:\n" + error);
             }
             String out = output+error;
-            if (out.contains("100% packet loss")) {
+            if (out.contains("100% packet loss")||out.contains("Request timeout")||out.contains("Destination Host Unreachable")) {
                 a.incrementAndGet();
             }
 

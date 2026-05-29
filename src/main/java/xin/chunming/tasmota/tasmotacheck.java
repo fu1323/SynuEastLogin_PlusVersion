@@ -13,7 +13,7 @@ public class tasmotacheck {
     public static void checktasmota(ip ip, tasmotastatus now, OkHttpClient client) throws Exception {
 
         AtomicInteger court = new AtomicInteger(0);
-        int temp = 0;
+        //int temp = 0;
         ping.main(ip.getEthip(), court);
         System.out.println(court.get());
 //        if (court.get() != 0) {
@@ -23,11 +23,13 @@ public class tasmotacheck {
 //                ping.main(ip.getWlanip(), court);
 //            }
 //        }
-        if (temp > 0 && court.get() - temp != 0) {
+       // System.out.println(court.get());
+        if (court.get()>0) {
             try {
                 if (now != null) {
-                    if (!now.getStatus().equalsIgnoreCase("ON")) {
-                        close.operate(ip, "ON",client);
+                    if (!now.getStatus().equalsIgnoreCase("OFF")) {
+                       // System.out.println(1);
+                        close.operate(ip, "OFF",client);
                         now.setStatus("OFF");
                     }
                 }
@@ -42,8 +44,8 @@ public class tasmotacheck {
         } else {
             try {
                 if (now != null) {
-                    if (!now.getStatus().equalsIgnoreCase("OFF")) {
-                        close.operate(ip, "OFF",client);
+                    if (!now.getStatus().equalsIgnoreCase("ON")) {
+                        close.operate(ip, "ON",client);
                         now.setStatus("ON");
 
                     }
