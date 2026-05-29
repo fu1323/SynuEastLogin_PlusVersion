@@ -123,12 +123,19 @@ public class Main {
 
 
             );
-
+            if (ip.isEnadle()) {
+                status.setStatus(close.query(ip, client));
+                Thread.sleep(3000);
+                System.out.println(status.getStatus());
+            }
             if (args.length > 0) {
                 if (String.valueOf(args[0]).equalsIgnoreCase("login")) {
                     Authorize(r, pu, aliyunBean);
                 } else if (String.valueOf(args[0]).equalsIgnoreCase("tasmota")) {
-                    tasmotacheck.checktasmota(ip, null, client);
+                    status.setStatus(close.query(ip, client));
+
+                    tasmotacheck.checktasmota(ip, status, client);
+
                 }
             } else {
                 ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
@@ -142,13 +149,15 @@ public class Main {
                                     check(r, pu, aliyunBean);
                                     if (ip.isEnadle()) {
                                         if (status.getStatus() != null) {
-                                            System.out.println("tasmotabefore:" + (status.getStatus().equalsIgnoreCase(close.CLOSE) ? "开" : "关"));
-                                            log.info("tasmotabefore:" + (status.getStatus().equalsIgnoreCase(close.CLOSE) ? "开" : "关"));
+                                            // System.out.println("tasmotabefore:" + (status.getStatus().equalsIgnoreCase("ON") ? "开" : "关"));
+                                            log.info("tasmotabefore:" + (status.getStatus().equalsIgnoreCase("ON") ? "开" : "关"));
                                         }
-                                        status.setStatus(close.CLOSE);
                                         tasmotacheck.checktasmota(ip, status, client);
-                                        System.out.println("tasmotanow:" + (status.getStatus().equalsIgnoreCase(close.CLOSE) ? "开" : "关"));
-                                        log.info("tasmotanow:" + (status.getStatus().equalsIgnoreCase(close.CLOSE) ? "开" : "关"));
+                                        // System.out.println("tasmotanow:" + (status.getStatus().equalsIgnoreCase("ON") ? "开" : "关"));
+
+                                        status.setStatus(close.query(ip, client));
+                                        Thread.sleep(3000);
+                                        log.info("tasmotanow:" + (status.getStatus().equalsIgnoreCase("ON") ? "开" : "关"));
                                     }
                                 } catch (Exception e) {
                                     log.error(e.getMessage());

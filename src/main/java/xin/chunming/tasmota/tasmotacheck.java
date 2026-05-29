@@ -26,30 +26,27 @@ public class tasmotacheck {
         if (temp > 0 && court.get() - temp != 0) {
             try {
                 if (now != null) {
-                    if (!now.getStatus().equalsIgnoreCase(close.CLOSE)) {
-                        close.operate(ip, close.CLOSE,client);
-                        now.setStatus(close.CLOSE);
+                    if (!now.getStatus().equalsIgnoreCase("ON")) {
+                        close.operate(ip, "ON",client);
+                        now.setStatus("OFF");
                     }
-                } else {
-                    close.operate(ip, close.CLOSE,client);
-                    now.setStatus(close.CLOSE);
-
                 }
+//                else {
+//                    close.operate(ip, close.CLOSE,client);
+//                    now.setStatus(close.CLOSE);
+//
+//                }
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         } else {
             try {
                 if (now != null) {
-                    if (!now.getStatus().equalsIgnoreCase(close.OPEN)) {
-                        close.operate(ip, close.OPEN,client);
-                        now.setStatus(close.OPEN);
+                    if (!now.getStatus().equalsIgnoreCase("OFF")) {
+                        close.operate(ip, "OFF",client);
+                        now.setStatus("ON");
 
                     }
-                } else {
-                    close.operate(ip, close.OPEN,client);
-                    now.setStatus(close.OPEN);
-
                 }
             } catch (IOException e) {
                 throw new RuntimeException(e);
