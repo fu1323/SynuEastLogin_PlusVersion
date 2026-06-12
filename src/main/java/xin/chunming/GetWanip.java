@@ -74,7 +74,7 @@ public class GetWanip {
             JsonNode jsonNode = MAPPER.readTree(responseJson);
 
             JsonNode ipNode = jsonNode
-                    .path("Data")
+                    .path("results")
                     .path("data")
                     .get(0)
                     .path("dhcp_ip_addr");
